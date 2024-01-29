@@ -1,0 +1,135 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+Generating the clinical-radiomics model
+
+# model 1 (BMUS radiomics model) is BMUS Rad-score combined with composition, margin, and echogenic foci
+```{r}
+library("rms")
+library("ggplot2")
+library("pROC")
+df_clinical_radiomics <- read.csv(
+  file="./dataset/combind model/sample_Clinical_Radiomics.csv", 
+  header=T, sep=',', stringsAsFactors = F)
+model1 <- rms::lrm(
+  formula="Label ~ Signature_BMUS + composition + margin + echogenic_foci", 
+  x=T,y=T, data = df_train_data)
+summary(model1)
+save(model1, file = "./dataset/combind model/result/model1.RData")
+nomo_model1 <- rms::nomogram(
+  model1,
+  fun=plogis,
+  fun.at=c(.001, .01, seq(.1,.9, by=.2), .99, .999),
+  lp=F,
+  maxscale=100,
+  funlabel="Risk")
+plot(nomo_model1, xfrac = 0.6)
+
+predictValue = predict(model1, df_clinical_radiomics)
+roc_obj <- pROC::roc(
+    response=df_clinical_radiomics$Label, 
+    predictor=plogis(predict(model1, df_clinical_radiomics)))
+best_threshold <- pROC::coords(roc_obj, "best", ret=c("threshold"), drop = T, transpose = TRUE)[1]
+print(sprintf("Cut-off value is %f.", best_threshold))
+plot(roc_feature_obj, main = "Model 1", lwd=3) 
+```
+
+# model 2 (BMUS+SMI radiomics model) is BMUS-SMI Rad-score combined with composition, margin, echogenic foci, and SMI vascularity type
+```{r}
+library("rms")
+library("ggplot2")
+library("pROC")
+df_clinical_radiomics <- read.csv(
+  file="./dataset/combind model/sample_Clinical_Radiomics.csv", 
+  header=T, sep=',', stringsAsFactors = F)
+model2 <- rms::lrm(
+  formula="Label ~ Signature_BMUS_SMI + margin + SMI_vascular_type", 
+  x=T,y=T, data = df_train_data)
+summary(model2)
+save(model2, file = "./dataset/combind model/result/model2.RData")
+nomo_model2 <- rms::nomogram(
+  model2,
+  fun=plogis,
+  fun.at=c(.001, .01, seq(.1,.9, by=.2), .99, .999),
+  lp=F,
+  maxscale=100,
+  funlabel="Risk")
+plot(nomo_model2, xfrac = 0.6)
+
+predictValue = predict(model2, df_clinical_radiomics)
+roc_obj <- pROC::roc(
+    response=df_clinical_radiomics$Label, 
+    predictor=plogis(predict(model2, df_clinical_radiomics)))
+best_threshold <- pROC::coords(roc_obj, "best", ret=c("threshold"), drop = T, transpose = TRUE)[1]
+print(sprintf("Cut-off value is %f.", best_threshold))
+plot(roc_feature_obj, main = "Model 2", lwd=3) 
+```
+
+# model 3 (BMUS+CEUS radiomics model) is BMUS+CEUS Rad-score combined with composition, margin, echogenic foci, and enhancement direction
+```{r}
+library("rms")
+library("ggplot2")
+library("pROC")
+df_clinical_radiomics <- read.csv(
+  file="./dataset/combind model/sample_Clinical_Radiomics.csv", 
+  header=T, sep=',', stringsAsFactors = F)
+model3 <- rms::lrm(
+  formula="Label ~ Signature_BMUS_CEUS + margin + echogenic_foci + Enhancement_direction2", 
+  x=T,y=T, data = df_train_data)
+summary(model3)
+save(model3, file = "./dataset/combind model/result/model3.RData")
+nomo_model3 <- rms::nomogram(
+  model3,
+  fun=plogis,
+  fun.at=c(.001, .01, seq(.1,.9, by=.2), .99, .999),
+  lp=F,
+  maxscale=100,
+  funlabel="Risk")
+plot(nomo_model3, xfrac = 0.6)
+
+predictValue = predict(model3, df_clinical_radiomics)
+roc_obj <- pROC::roc(
+    response=df_clinical_radiomics$Label, 
+    predictor=plogis(predict(model3, df_clinical_radiomics)))
+best_threshold <- pROC::coords(roc_obj, "best", ret=c("threshold"), drop = T, transpose = TRUE)[1]
+print(sprintf("Cut-off value is %f.", best_threshold))
+plot(roc_feature_obj, main = "Model 3", lwd=3) 
+```
+
+# model 4 (BMUS+SMI+CEUS radiomics model) is BMUS+SMI+CEUS Rad-score combined with margin, echogenic foci, SMI vascularity type, and enhancement direction. 
+```{r}
+library("rms")
+library("ggplot2")
+library("pROC")
+df_clinical_radiomics <- read.csv(
+  file="./dataset/combind model/sample_Clinical_Radiomics.csv", 
+  header=T, sep=',', stringsAsFactors = F)
+model4 <- rms::lrm(
+  formula="Label ~ Signature_ALL + echogenic_foci + Enhancement_direction2 + 
+    SMI_vascular_type", 
+  x=T,y=T, data = df_train_data)
+summary(model4)
+save(model4, file = "./dataset/combind model/result/model4.RData")
+nomo_model4 <- rms::nomogram(
+  model4,
+  fun=plogis,
+  fun.at=c(.001, .01, seq(.1,.9, by=.2), .99, .999),
+  lp=F,
+  maxscale=100,
+  funlabel="Risk")
+plot(nomo_model4, xfrac = 0.6)
+
+predictValue = predict(model4, df_clinical_radiomics)
+roc_obj <- pROC::roc(
+    response=df_clinical_radiomics$Label, 
+    predictor=plogis(predict(model4, df_clinical_radiomics)))
+best_threshold <- pROC::coords(roc_obj, "best", ret=c("threshold"), drop = T, transpose = TRUE)[1]
+print(sprintf("Cut-off value is %f.", best_threshold))
+plot(roc_feature_obj, main = "Model 4", lwd=3) 
+```

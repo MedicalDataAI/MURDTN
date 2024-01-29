@@ -1,0 +1,145 @@
+---
+title: "Radiomic Score Construction"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+Generating the differential Radiomics Score from BMUS, CEUS and SMI.
+
+# construct BMUS Score
+```{r}
+library(glmnet)
+df_feature_bmus <- read.csv(
+  file="./dataset/radiomics model/BMUS/sample_feature.csv", 
+  header=T, sep=',', stringsAsFactors = F)
+df_feature_bmus$Label <- as.numeric(as.character(df_feature_bmus$Label))
+
+xd <- as.matrix(df_feature_bmus[, 2:ncol(df_feature_bmus)])
+yd <- df_feature_bmus$Label
+
+g_lasso = glmnet::cv.glmnet(
+  x=xd, 
+  y=yd,
+  family="binomial",
+  type.measure="auc",
+  nfolds=10,
+  keep = F,
+  parallel=T)
+save(g_lasso, file="./dataset/radiomics model/BMUS/result/g_lasso.RData")
+
+png(filename = "./dataset/radiomics model/BMUS/result/LassoTrain_Kflod.png")
+plot(g_lasso,las=1,lwd=2)
+title("10-folds cross-validation", line=2.5)
+dev.off()
+
+png(filename = "./dataset/radiomics model/BMUS/result/LassoTrain_FeatureSelect.png")
+cvfit.1se <- g_lasso$glmnet.fit
+print(myMsg)
+plot(g_lasso$glmnet.fit, xvar="lambda",label=FALSE,las=1,lwd=2)
+abline(v = log(g_lasso$lambda.1se),col=c(240,230,230),lwd=2)
+dev.off()
+```
+# create BMUS+CEUS score
+```{r}
+library(glmnet)
+df_feature_bmus_ceus <- read.csv(
+  file="./dataset/radiomics model/BMUS_CEUS/sample_feature.csv", 
+  header=T, sep=',', stringsAsFactors = F)
+df_feature_bmus_ceus$Label <- as.numeric(as.character(df_feature_bmus_ceus$Label))
+
+xd <- as.matrix(df_feature_bmus_ceus[, 2:ncol(df_feature_bmus_ceus)])
+yd <- df_feature_bmus_ceus$Label
+
+g_lasso = glmnet::cv.glmnet(
+  x=xd, 
+  y=yd,
+  family="binomial",
+  type.measure="auc",
+  nfolds=10,
+  keep = F,
+  parallel=T)
+save(g_lasso, file="./dataset/radiomics model/BMUS_CEUS/result/g_lasso.RData")
+
+png(filename = "./dataset/radiomics model/BMUS_CEUS/result/LassoTrain_Kflod.png")
+plot(g_lasso,las=1,lwd=2)
+title("10-folds cross-validation", line=2.5)
+dev.off()
+
+png(filename = "./dataset/radiomics model/BMUS_CEUS/result/LassoTrain_FeatureSelect.png")
+cvfit.1se <- g_lasso$glmnet.fit
+print(myMsg)
+plot(g_lasso$glmnet.fit, xvar="lambda",label=FALSE,las=1,lwd=2)
+abline(v = log(g_lasso$lambda.1se),col=c(240,230,230),lwd=2)
+dev.off()
+```
+# create BMUS+SMI score
+```{r}
+library(glmnet)
+df_feature_bmus_smi <- read.csv(
+file="./dataset/radiomics model/BMUS/sample_feature.csv", 
+header=T, sep=',', stringsAsFactors = F)
+df_feature_bmus_smi$Label <- as.numeric(as.character(df_feature_bmus_smi$Label))
+
+xd <- as.matrix(df_feature_bmus_smi[, 2:ncol(df_feature_bmus_smi)])
+yd <- df_feature_bmus_smi$Label
+
+g_lasso = glmnet::cv.glmnet(
+  x=xd, 
+  y=yd,
+  family="binomial",
+  type.measure="auc",
+  nfolds=10,
+  keep = F,
+  parallel=T)
+save(g_lasso, file="./dataset/radiomics model/BMUS_SMI/result/g_lasso.RData")
+
+png(filename = "./dataset/radiomics model/BMUS_SMI/result/LassoTrain_Kflod.png")
+plot(g_lasso,las=1,lwd=2)
+title("10-folds cross-validation", line=2.5)
+dev.off()
+
+png(filename = "./dataset/radiomics model/BMUS_SMI/result/LassoTrain_FeatureSelect.png")
+cvfit.1se <- g_lasso$glmnet.fit
+print(myMsg)
+plot(g_lasso$glmnet.fit, xvar="lambda",label=FALSE,las=1,lwd=2)
+abline(v = log(g_lasso$lambda.1se),col=c(240,230,230),lwd=2)
+dev.off()
+```
+# create BMUS+CEUS+SMI score
+```{r}
+library(glmnet)
+df_feature_bmus_ceus_smi <- read.csv(
+  file="./dataset/radiomics model/ALL/sample_feature.csv", 
+  header=T, sep=',', stringsAsFactors = F)
+df_feature_bmus_ceus_smi$Label <- as.numeric(as.character(df_feature_bmus_ceus_smi$Label))
+
+xd <- as.matrix(df_feature_bmus_ceus_smi[, 2:ncol(df_feature_bmus_ceus_smi)])
+yd <- df_feature_bmus_ceus_smi$Label
+
+g_lasso = glmnet::cv.glmnet(
+  x=xd, 
+  y=yd,
+  family="binomial",
+  type.measure="auc",
+  nfolds=10,
+  keep = F,
+  parallel=T)
+save(g_lasso, file="./dataset/radiomics model/ALL/result/g_lasso.RData")
+
+png(filename = "./dataset/radiomics model/ALL/result/LassoTrain_Kflod.png")
+plot(g_lasso,las=1,lwd=2)
+title("10-folds cross-validation", line=2.5)
+dev.off()
+
+png(filename = "./dataset/radiomics model/ALL/result/LassoTrain_FeatureSelect.png")
+cvfit.1se <- g_lasso$glmnet.fit
+print(myMsg)
+plot(g_lasso$glmnet.fit, xvar="lambda",label=FALSE,las=1,lwd=2)
+abline(v = log(g_lasso$lambda.1se),col=c(240,230,230),lwd=2)
+dev.off()
+```
+
